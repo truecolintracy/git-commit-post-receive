@@ -1,0 +1,34 @@
+#!/bin/bash
+GIT_DIR="/var/repo/example.git"
+
+#Development branch
+DEV_TARGET="/var/www/dev/example"
+DEV_BRANCH="dev"
+
+#Staging branch
+STAGING_TARGET="/var/www/example"
+STAGING_BRANCH="staging"
+
+#Production branch
+PROD_TARGET="/var/www/example"
+PROD_BRANCH="master"
+
+while read oldrev newrev ref
+do
+        # only checking out the master (or whatever branch you would like to deploy)
+        if [[ $ref = refs/heads/$DEV_BRANCH ]];
+        then
+                echo "Ref $ref received. Deploying ${DEV_BRANCH} branch to production..."
+                git --work-tree=$DEV_TARGET --git-dir=$GIT_DIR checkout ${DEV_BRANCH} -f
+        elif [[ $ref = refs/heads/$STAGING_BRANCH ]];
+        then
+                echo "Ref $ref received. Deploying ${STAGING_BRANCH} branch to production..."
+                git --work-tree=$STAGING_TARGET --git-dir=$GIT_DIR checkout ${STAGING_BRANCH} -f
+        elif [[ $ref = refs/heads/$PROD_BRANCH ]];
+        then
+                echo "Ref $ref received. Deploying ${PROD_BRANCH} branch to production..."
+                git --work-tree=$PROD_TARGET --git-dir=$GIT_DIR checkout ${PROD_BRANCH} -f
+        else
+                echo "Ref $ref received. Doing nothing: only the ${BRANCH} branch may be deployed on this server."
+        fi
+done
